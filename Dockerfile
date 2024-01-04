@@ -2,6 +2,8 @@ FROM openjdk:17-slim-buster
 
 ADD build/libs/user-0.0.1-SNAPSHOT.jar boot.jar
 
-EXPOSE 9001
+ARG PORT=9001
+ARG APPLICATION_NAME="user"
+ARG EUREKA_SERVER_IP="127.0.0.1"
 
-CMD ["sh","-c","java -jar boot.jar"]
+CMD ["sh","-c","java -jar -DPORT=$PORT -DEUREKA_SERVER_IP=$EUREKA_SERVER_IP -DAPPLICATION_NAME=$APPLICATION_NAME boot.jar"]
