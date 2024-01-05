@@ -29,6 +29,10 @@ dependencies {
     // web
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    // Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
+
     // cloud
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 

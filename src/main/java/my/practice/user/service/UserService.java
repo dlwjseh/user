@@ -1,5 +1,6 @@
 package my.practice.user.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import my.practice.user.vo.UserVo;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Transactional
 	public UserVo create(UserCreateDto createDto) {
@@ -23,7 +25,8 @@ public class UserService {
 		if (duplicatedEmail) {
 			throw new RuntimeException("중복된 Email입니다.");
 		}
-		User user = userRepository.save(new User(createDto.getEmail(), createDto.getPassword()));
+		String encodedPassword = passwordEncoder.encode(createDto.getPassword());
+		User user = userRepository.save(new User(createDto.getEmail(), encodedPassword));
 		return new UserVo(user);
 	}
 
