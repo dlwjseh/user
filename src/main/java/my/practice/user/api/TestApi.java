@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TestApi {
 
-    @GetMapping("/test1")
+    @GetMapping("/test1/t1")
     public ResponseEntity<?> test1(HttpServletRequest request) {
         request.getHeaderNames().asIterator()
                 .forEachRemaining(h -> log.info("Test1 Header: Name:{}, Value:{}", h, request.getHeader(h)));
         return ResponseEntity.ok("hello1");
     }
 
-    @GetMapping("/test2")
+    @GetMapping("/test2/t2")
     public ResponseEntity<?> test2(HttpServletRequest request) {
         request.getHeaderNames().asIterator()
                 .forEachRemaining(h -> log.info("Test2 Header: Name:{}, Value:{}", h, request.getHeader(h)));
