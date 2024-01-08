@@ -1,5 +1,6 @@
 server:
   port: 9001
+  shutdown: graceful
 eureka:
   client:
     service-url:
@@ -16,3 +17,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+management:
+  endpoint:
+    health:
+      show-details: when_authorized
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,caches,beans
