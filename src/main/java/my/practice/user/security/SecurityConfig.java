@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/test1/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .apply(new JwtSecurityConfig(objectMapper))
         ;
 
         return http.build();
