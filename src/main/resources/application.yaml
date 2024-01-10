@@ -1,3 +1,4 @@
+secret: secret
 server:
   port: 9001
   shutdown: graceful

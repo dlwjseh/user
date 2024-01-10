@@ -20,6 +20,6 @@ public class JwtSecurityConfig implements SecurityConfigurer<DefaultSecurityFilt
     @Override
     public void configure(HttpSecurity builder) throws Exception {
         AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
-        builder.addFilterBefore(new AuthenticationFilter(authenticationManager, objectMapper), UsernamePasswordAuthenticationFilter.class);
+        builder.addFilterBefore(new JwtAuthenticationFilter(authenticationManager, objectMapper), UsernamePasswordAuthenticationFilter.class);
     }
 }
