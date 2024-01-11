@@ -38,7 +38,8 @@ public class SecurityConfig {
                 // Session 생성 규칙 > 사용하지 않음
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 인증 실패 시 핸들링
-                .exceptionHandling((exception) -> exception.authenticationEntryPoint(authenticationEntryPoint()))
+                .exceptionHandling((exception)
+                        -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper)))
                 // Http Request 인가 설정
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/test1/**").permitAll()
@@ -56,14 +57,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * 인증 실패 처리
-     */
-    @Bean
-    public AuthenticationEntryPoint authenticationEntryPoint() {
-        return new CustomAuthenticationEntryPoint(objectMapper);
     }
 
 }

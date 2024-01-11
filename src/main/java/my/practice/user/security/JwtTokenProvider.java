@@ -33,7 +33,7 @@ public class JwtTokenProvider {
     public String createToken(SecurityUser user, HttpServletRequest request) {
         Claims claims = Jwts.claims().setSubject(user.getUsername());
         claims.put("roles", user.getAuthorities());
-        claims.put("auth",  new CryptoAES().encrypt(Compress.compressAndReturnB64(jsonMapper.writeValueAsString(user.getUserVo()))));
+//        claims.put("auth",  new CryptoAES().encrypt(Compress.compressAndReturnB64(jsonMapper.writeValueAsString(user.getUserVo()))));
         claims.put("remoteAddress", getAddress(request));
 
         Date now = new Date();
@@ -60,7 +60,7 @@ public class JwtTokenProvider {
                 .filter(StringUtils::hasText)
                 .filter(ip -> !UNKNOWN.equalsIgnoreCase(ip))
                 .findFirst()
-                .orElse(request.getRemoteAddr())
+                .orElse(request.getRemoteAddr());
     }
 
 }
