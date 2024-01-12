@@ -1,17 +1,18 @@
 package my.practice.user.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import my.practice.user.dto.UserLoginDto;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.util.StreamUtils;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import my.practice.user.dto.UserLoginDto;
 
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private final ObjectMapper objectMapper;
@@ -19,7 +20,6 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper objectMapper) {
         super("/login", authenticationManager);
         this.objectMapper = objectMapper;
-        this.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
     }
 
     @Override

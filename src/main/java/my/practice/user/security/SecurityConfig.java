@@ -2,6 +2,8 @@ package my.practice.user.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +23,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
+
+    @Value("${secret}")
+    private String secretKey;
 
     /**
      * Http Security 설정
@@ -44,7 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/test1/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .apply(new JwtSecurityConfig(objectMapper))
+                .apply(new JwtSecurityConfig(secretKey, objectMapper))
         ;
 
         return http.build();
