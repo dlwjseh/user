@@ -1,8 +1,6 @@
 package my.practice.user.security;
 
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.CompressionCodecs;
 import io.jsonwebtoken.Jwts;
@@ -32,20 +30,18 @@ public class JwtTokenProvider {
     public static final String HEADER_NAME = "X-AUTH-TOKEN";
     private static final long TOKEN_VALID_TIME = 1000L * 60L * 60L * 2L; // 2시간
 
-    private final JsonMapper jsonMapper = JsonMapper.builder()
-            .configure(SerializationFeature.WRITE_ENUMS_USING_TO_STRING, false)
-            .configure(MapperFeature.USE_ANNOTATIONS, false)
-            .build();
+    private final ObjectMapper objectMapper;
 
-    public JwtTokenProvider(String secretKey) {
+    public JwtTokenProvider(String secretKey, ObjectMapper objectMapper) {
         assert secretKey != null;
         this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
+        this.objectMapper = objectMapper;
     }
 
     public String createToken(SecurityUser user, HttpServletRequest request) throws IOException, NoSuchPaddingException,
             IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Claims claims = Jwts.claims().setSubject(user.getUsername());
-        byte[] encodedAuth = Base64.getEncoder().encode(compressString(jsonMapper.writeValueAsString(user.getUserVo())));
+        byte[] encodedAuth = Base64.getEncoder().encode(compressString(objectMapper.writeValueAsString(user.getUserVo())));
         claims.put("auth", cryptoAES.encrypt(encodedAuth));
         claims.put("remoteAddress", getAddress(request));
         Date now = new Date();

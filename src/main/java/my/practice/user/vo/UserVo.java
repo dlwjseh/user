@@ -1,5 +1,6 @@
 package my.practice.user.vo;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import my.practice.user.enums.UserStatus;
  */
 @Getter
 @NoArgsConstructor
-public class UserVo {
+public class UserVo implements Serializable {
 
 	private Long id;
 

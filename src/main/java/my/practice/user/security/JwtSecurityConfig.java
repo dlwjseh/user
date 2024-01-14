@@ -14,7 +14,7 @@ public class JwtSecurityConfig implements SecurityConfigurer<DefaultSecurityFilt
 
     public JwtSecurityConfig(String secretKey, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.jwtTokenProvider = new JwtTokenProvider(secretKey);
+        this.jwtTokenProvider = new JwtTokenProvider(secretKey, objectMapper);
     }
 
     @Override

@@ -18,6 +18,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
+/**
+ * 로그인 성공 Handler
+ */
 @RequiredArgsConstructor
 public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
@@ -28,8 +31,9 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         // 성공 비즈니스 로직
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
         // Token 생성
+        String token;
         try {
-            String token = jwtTokenProvider.createToken(securityUser, request);
+            token = jwtTokenProvider.createToken(securityUser, request);
             response.setHeader(JwtTokenProvider.HEADER_NAME, token);
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException e) {
@@ -37,7 +41,7 @@ public class JwtAuthenticationSuccessHandler implements AuthenticationSuccessHan
         }
         // Response 생성
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(objectMapper.writeValueAsString(Map.of("token", request.getAttribute("token"))));
+        response.getWriter().write(objectMapper.writeValueAsString(Map.of("token", token)));
         response.getWriter().flush();
 
     }

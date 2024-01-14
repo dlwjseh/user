@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
  */
 public class CryptoAES {
     private final SecretKey key = new SecretKeySpec(
-            "LKsNicCpT5KXjXzpIkVj5obCdorBRkKBXHLQk2tW2B8=".getBytes(StandardCharsets.UTF_8),
+            "jXzpIkVj5obCdorBRkKBXHLQk2tW2B8=".getBytes(StandardCharsets.UTF_8),
             "AES");
 
     public String encrypt(byte[] contents) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,

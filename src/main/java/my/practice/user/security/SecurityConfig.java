@@ -1,11 +1,16 @@
 package my.practice.user.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
-
+import my.practice.user.service.CustomUserDetailService;
+import my.practice.user.service.LocalDateTimeDeserializer;
+import my.practice.user.service.LocalDateTimeSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,6 +20,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Spring Security 설정
  */
@@ -22,7 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final ObjectMapper objectMapper;
+    private final CustomUserDetailService customUserDetailService;
 
     @Value("${secret}")
     private String secretKey;
@@ -43,16 +51,26 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 인증 실패 시 핸들링
                 .exceptionHandling((exception)
-                        -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper)))
+                        -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper())))
                 // Http Request 인가 설정
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/test1/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .apply(new JwtSecurityConfig(secretKey, objectMapper))
+                .apply(new JwtSecurityConfig(secretKey, objectMapper()))
         ;
 
         return http.build();
+    }
+
+    /**
+     * AuthenticationProvider
+     */
+    @Bean
+    public AuthenticationProvider customDaoAuthenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(passwordEncoder());
+        authenticationProvider.setUserDetailsService(customUserDetailService);
+        return authenticationProvider;
     }
 
     /**
@@ -61,6 +79,17 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter));
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTimeFormatter));
+        objectMapper.registerModule(javaTimeModule);
+        return objectMapper;
     }
 
 }

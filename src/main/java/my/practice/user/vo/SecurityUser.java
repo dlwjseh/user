@@ -3,16 +3,14 @@ package my.practice.user.vo;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class SecurityUser extends User {
     private final UserVo userVo;
     public SecurityUser(String username, String password, UserVo userVo) {
-        super(username, password, new HashSet<>());
+        super(username, password,
+                userVo.getRoles().stream().map(r -> new SimpleGrantedAuthority(r.name())).collect(Collectors.toSet()));
         this.userVo = userVo;
-        this.getAuthorities().addAll(
-                userVo.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.name())).toList()
-        );
     }
 
     public UserVo getUserVo() {
