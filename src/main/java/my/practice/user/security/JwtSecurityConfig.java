@@ -12,23 +12,24 @@ public class JwtSecurityConfig implements SecurityConfigurer<DefaultSecurityFilt
     private final ObjectMapper objectMapper;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtSecurityConfig(String secretKey, ObjectMapper objectMapper) {
+    public JwtSecurityConfig(JwtTokenProvider jwtTokenProvider, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.jwtTokenProvider = new JwtTokenProvider(secretKey, objectMapper);
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
-    public void init(HttpSecurity builder) throws Exception {
+    public void init(HttpSecurity builder) {
     }
 
     @Override
-    public void configure(HttpSecurity builder) throws Exception {
+    public void configure(HttpSecurity builder) {
         AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
 
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, objectMapper);
         jwtAuthenticationFilter.setAuthenticationSuccessHandler(
-                new JwtAuthenticationSuccessHandler(jwtTokenProvider, objectMapper));
+                new JwtAuthenticationSuccessHandler(jwtTokenProvider));
 
-        builder.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        builder.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtAuthorizationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
     }
 }

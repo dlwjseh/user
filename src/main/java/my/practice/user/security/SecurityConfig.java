@@ -54,10 +54,10 @@ public class SecurityConfig {
                         -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper())))
                 // Http Request 인가 설정
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/test1/**").permitAll()
+                        .requestMatchers("/test1/**", "/users/refresh").permitAll()
                         .anyRequest().authenticated()
                 )
-                .apply(new JwtSecurityConfig(secretKey, objectMapper()))
+                .apply(new JwtSecurityConfig(jwtTokenProvider(), objectMapper()))
         ;
 
         return http.build();
@@ -90,6 +90,11 @@ public class SecurityConfig {
         javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(dateTimeFormatter));
         objectMapper.registerModule(javaTimeModule);
         return objectMapper;
+    }
+
+    @Bean
+    public JwtTokenProvider jwtTokenProvider() {
+        return new JwtTokenProvider(secretKey, objectMapper());
     }
 
 }

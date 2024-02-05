@@ -1,5 +1,7 @@
 package my.practice.user.service;
 
+import my.practice.user.exception.NotFoundUserException;
+import my.practice.user.vo.SecurityUser;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,13 @@ public class UserService {
 		String encodedPassword = passwordEncoder.encode(createDto.getPassword());
 		User user = userRepository.save(new User(createDto.getEmail(), encodedPassword));
 		return new UserVo(user);
+	}
+
+	@Transactional(readOnly = true)
+	public SecurityUser findByUsername(String username) {
+		return userRepository.findByEmail(username)
+				.map(u -> new SecurityUser(u.getEmail(), u.getPassword(), new UserVo(u)))
+				.orElseThrow(NotFoundUserException::new);
 	}
 
 }

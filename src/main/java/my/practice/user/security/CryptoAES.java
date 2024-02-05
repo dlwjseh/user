@@ -21,11 +21,11 @@ public class CryptoAES {
         return new String(cipher.doFinal(contents));
     }
 
-    public String decrypt(byte[] contents) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+    public byte[] decrypt(byte[] contents) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
             IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, key);
-        return new String(cipher.doFinal(contents));
+        return cipher.doFinal(contents);
     }
 
 }
