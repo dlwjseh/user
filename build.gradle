@@ -37,6 +37,7 @@ dependencies {
 
     // cloud
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
 
     // db
     implementation 'mysql:mysql-connector-java:8.0.28'
@@ -53,7 +54,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // Compress
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-compress
     implementation 'org.apache.commons:commons-compress:1.21'
 
 }

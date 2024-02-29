@@ -36,7 +36,7 @@ public class UserApi {
 	 */
 	@GetMapping("/refresh")
 	public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String refreshToken = request.getHeader(JwtTokenProvider.REFRESH_HEADER_NAME);
+		String refreshToken = request.getHeader(jwtTokenProvider.getHeaderName());
 		jwtTokenProvider.validateToken(refreshToken);
 		String username = jwtTokenProvider.getUsernameFromRefreshToken(refreshToken);
 		SecurityUser user = userService.findByUsername(username);

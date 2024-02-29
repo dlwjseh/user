@@ -16,7 +16,7 @@ public class JwtAuthorizationFilter extends GenericFilter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest servletRequest = (HttpServletRequest) request;
-        String token = servletRequest.getHeader(JwtTokenProvider.HEADER_NAME);
+        String token = servletRequest.getHeader(jwtTokenProvider.getHeaderName());
 
         if (StringUtils.hasText(token)) {
             jwtTokenProvider.validateToken(token);

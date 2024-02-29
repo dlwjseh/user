@@ -3,6 +3,8 @@ package my.practice.user.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import my.practice.user.config.TokenConfig;
 import my.practice.user.exception.InvalidTokenException;
 import my.practice.user.vo.SecurityUser;
 import my.practice.user.vo.UserVo;
@@ -26,29 +28,20 @@ import java.util.Map;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterOutputStream;
 
+@RequiredArgsConstructor
 public class JwtTokenProvider {
     private final CryptoAES cryptoAES = new CryptoAES();
-    private final String secretKey;
-    public static final String HEADER_NAME = "X-AUTH-TOKEN";
-    public static final String REFRESH_HEADER_NAME = "X-AUTH-REFRESH-TOKEN";
-    private static final long TOKEN_VALID_TIME = 1000L * 60L * 5L; // 5분
-    private static final long REFRESH_TOKEN_VALID_TIME = 1000L * 60L * 60L * 2L; // 2시간
+    private final TokenConfig tokenConfig;
 
     private final ObjectMapper objectMapper;
-
-    public JwtTokenProvider(String secretKey, ObjectMapper objectMapper) {
-        assert secretKey != null;
-        this.secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes(StandardCharsets.UTF_8));
-        this.objectMapper = objectMapper;
-    }
 
     /**
      * 토큰 발급
      */
     public void issueToken(HttpServletResponse response, SecurityUser user) throws IOException {
         try {
-            response.setHeader(JwtTokenProvider.HEADER_NAME, this.createToken(user));
-            response.setHeader(JwtTokenProvider.REFRESH_HEADER_NAME, this.createRefreshToken(user.getUsername()));
+            response.setHeader(tokenConfig.getHeaderName(), this.createToken(user));
+            response.setHeader(tokenConfig.getRefreshHeaderName(), this.createRefreshToken(user.getUsername()));
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException e) {
             throw new RuntimeException(e);
@@ -73,8 +66,8 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims) // 데이터
                 .setIssuedAt(now) // 토큰 발행일자
-                .setExpiration(new Date(now.getTime() + TOKEN_VALID_TIME)) // set Expire Time
-                .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret값 세팅
+                 .setExpiration(new Date(now.getTime() + tokenConfig.getTokenValidTime())) // set Expire Time
+                .signWith(SignatureAlgorithm.HS256, tokenConfig.getSecretKey()) // 암호화 알고리즘, secret값 세팅
                 .compressWith(CompressionCodecs.DEFLATE)
                 .compact();
     }
@@ -88,8 +81,8 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME))
-                .signWith(SignatureAlgorithm.HS256, secretKey) // 암호화 알고리즘, secret값 세팅
+                 .setExpiration(new Date(now.getTime() + tokenConfig.getRefreshTokenValidTime()))
+                .signWith(SignatureAlgorithm.HS256, tokenConfig.getSecretKey()) // 암호화 알고리즘, secret값 세팅
                 .compressWith(CompressionCodecs.DEFLATE)
                 .compact();
     }
@@ -99,7 +92,7 @@ public class JwtTokenProvider {
      */
     public void validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+             Jws<Claims> claims = Jwts.parser().setSigningKey(tokenConfig.getSecretKey()).parseClaimsJws(token);
             if (claims.getBody().getExpiration().before(new Date())) {
                 throw new InvalidTokenException("만료된 토큰입니다.");
             }
@@ -114,7 +107,7 @@ public class JwtTokenProvider {
      */
     public Authentication getAuthentication(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(tokenConfig.getSecretKey()).parseClaimsJws(token);
             String encodedAuth = (String) claims.getBody().get("auth");
             String auth = new String(decompressBytes(new CryptoAES().decrypt(encodedAuth.getBytes(StandardCharsets.UTF_8))));
             UserVo userVo = objectMapper.readValue(auth, UserVo.class);
@@ -130,7 +123,7 @@ public class JwtTokenProvider {
      * RefreshToken을 통해 유저명 조회
      */
     public String getUsernameFromRefreshToken(String refreshToken) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(refreshToken).getBody().getSubject();
+        return Jwts.parser().setSigningKey(tokenConfig.getSecretKey()).parseClaimsJws(refreshToken).getBody().getSubject();
     }
 
     /**
@@ -153,6 +146,13 @@ public class JwtTokenProvider {
             ios.write(compressedBytes);
         }
         return os.toByteArray();
+    }
+
+    /**
+     * 토큰 헤더 명 조회
+     */
+    public String getHeaderName() {
+        return tokenConfig.getHeaderName();
     }
 
 }

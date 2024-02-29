@@ -3,10 +3,10 @@ package my.practice.user.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
+ import my.practice.user.config.TokenConfig;
 import my.practice.user.service.CustomUserDetailService;
 import my.practice.user.service.LocalDateTimeDeserializer;
 import my.practice.user.service.LocalDateTimeSerializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,9 +31,7 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomUserDetailService customUserDetailService;
-
-    @Value("${secret}")
-    private String secretKey;
+    private final TokenConfig tokenConfig;
 
     /**
      * Http Security 설정
@@ -54,7 +52,7 @@ public class SecurityConfig {
                         -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper())))
                 // Http Request 인가 설정
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/test1/**", "/users/refresh").permitAll()
+                        .requestMatchers("/test1/**", "/users/refresh", "/actuator", "/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .apply(new JwtSecurityConfig(jwtTokenProvider(), objectMapper()))
@@ -94,7 +92,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtTokenProvider jwtTokenProvider() {
-        return new JwtTokenProvider(secretKey, objectMapper());
+        return new JwtTokenProvider(tokenConfig, objectMapper());
     }
 
 }

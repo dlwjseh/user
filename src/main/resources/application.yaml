@@ -1,4 +1,3 @@
-secret: secret
 server:
   port: 9001
   shutdown: graceful
@@ -18,11 +17,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  config:
+    import: configserver:http://localhost:8888
 management:
   endpoint:
     health:
-      show-details: when_authorized
+      show-details: always
   endpoints:
     web:
       exposure:
-        include: health,info,env,caches,beans
+        include: health,info,env,caches,beans,configprops
